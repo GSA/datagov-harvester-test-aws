@@ -1,0 +1,13 @@
+
+# Name for lambda function
+name = "test"
+# SQS Input for lambda function
+sqs_input = "arn:aws:sqs:us-west-2:000000000000:test"
+# Code to run in lambda
+script = <<-PYTHON
+def handler(event, context):
+    for record in event['Records']:
+        print("test")
+        payload = record["body"]
+        print(str(payload))
+PYTHON

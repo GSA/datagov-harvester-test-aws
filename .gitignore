@@ -53,3 +53,7 @@ terraform/*/provision/.cache
 .kube*
 *.binding.json
 .terraform.lock.hcl
+
+# Lambda deployment files
+deployment.zip
+main.py
