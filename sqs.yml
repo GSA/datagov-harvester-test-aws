@@ -3,7 +3,7 @@ name: sqs
 id: b6850430-71bd-4096-9f75-e395524e7b73
 description: Test SQS Service
 display_name: SQS Resource
-image_url: 
+image_url: https://github.com/GSA/datagov-11ty/raw/main/_img/logo.png
 documentation_url: https://aws.amazon.com/sqs/
 support_url: https://github.com/GSA/datagov-brokerpak-harvester-aws
 tags: [aws, sqs, queue, harvester]
@@ -30,6 +30,7 @@ provision:
     details: "The ARN of the SQS resource"
     type: string
     required: true
+    default: ""
   template_refs:
     variables: terraform/sqs/provision/variables.tf
     outputs: terraform/sqs/provision/outputs.tf
@@ -43,11 +44,17 @@ bind:
     default: ${request.instance_id}
     overwrite: true
     type: string
+  - name: sqs_arn
+    details: "The ARN of the SQS resource"
+    type: string
+    required: true
+    default: ""
   outputs:
   - field_name: sqs_arn
     details: "The ARN of the SQS resource"
     type: string
     required: true
+    default: ""
   template_refs:
     main: terraform/sqs/bind/main.tf
 
