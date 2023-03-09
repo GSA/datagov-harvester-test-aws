@@ -48,7 +48,7 @@ bind:
     details: "The ARN of the SQS resource"
     type: string
     required: true
-    default: ""
+    default: ${instance.details["sqs_arn"]}
   outputs:
   - field_name: sqs_arn
     details: "The ARN of the SQS resource"
@@ -57,6 +57,7 @@ bind:
     default: ""
   template_refs:
     main: terraform/sqs/bind/main.tf
+    versions: terraform/sqs/bind/versions.tf
 
 examples: []
 plan_updateable: false

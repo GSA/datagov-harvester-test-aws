@@ -1,12 +1,20 @@
 [
   {
-    "name": "Cloud in local k8s",
-    "description": "Provision a SolrCloud instance in a local k8s (K8S)",
-    "service_name": "solr-cloud",
-    "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
-    "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
-    "instance_name": "demo-k8s",
-    "provision_params": "{\"solrMem\":\"1G\", \"solrCpu\":\"1000m\", \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-curl\", \"solrJavaMem\":\"-Xms300m -Xmx300m\", \"cloud_name\":\"demo\"}",
+    "name": "Test SQS",
+    "description": "Provision a simple sqs instance",
+    "service_name": "test1",
+    "service_id": "b6850430-71bd-4096-9f75-e395524e7b73",
+    "plan_id": "4c0c7e5e-9f86-47be-aaed-29ae9adf7c49",
+    "instance_name": "demo-sqs",
+    "bind_params": {}
+  },
+  {
+    "name": "Test Lambda",
+    "description": "Provision a simple lambda function",
+    "service_name": "test1",
+    "service_id": "a1fa5f24-ed73-48e8-a99f-14906728b945",
+    "plan_id": "4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d",
+    "instance_name": "demo-lambda",
     "bind_params": {}
   }
 ]
