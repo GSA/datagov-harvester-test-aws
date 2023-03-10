@@ -30,8 +30,13 @@ BUCKET_NAME=`echo "${S3_CREDENTIALS}" | jq -r .credentials.bucket`
 AWS_DEFAULT_REGION=`echo "${S3_CREDENTIALS}" | jq -r '.credentials.region'`
 
 echo "Creating SQS Instance: $instance_name-sqs"
-SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base'  make demo-up
-cat "$instance_name-sqs.binding.json"
+binding="binding-`date +%s`"
+SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base' BIND_NAME=$binding  make demo-up
+
+sqs_arn=`cat "$instance_name-sqs.binding.json" | jq -r .credentials.sqs_arn`
+# echo "Creating Lambda Function: $instance_name-lambda"
+# SERVICE_ID=$SERVICE_LAMBDA PLAN_ID=$PLAN_LAMBDA INSTANCE_NAME="$instance_name-lambda" SERVICE_NAME='lambda' PLAN_NAME='base' BIND_NAME=$binding  CLOUD_PROVISION_PARAMS="{\"sqsInput\": \"${sqs_arn}\", \"script\": \"${script}\"}" make demo-up
 
 
-# SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base'  make demo-down
+echo "Destrowing SQS Instance: $instance_name-sqs"
+SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base' BIND_NAME=$binding  make demo-down
