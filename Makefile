@@ -79,18 +79,18 @@ demo-up: ## Provision an instance of a specific plan and output the bound creden
 	@( \
 	set -e ;\
 	echo "Provisioning $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params '$(CLOUD_PROVISION_PARAMS)';\
+	$(CSB_EXEC) client provision --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params '$(CLOUD_PROVISION_PARAMS)' | jq -r .status_code;\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
-	$(CSB_EXEC) client bind      --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)" --bindingid binding --params "$(CLOUD_BIND_PARAMS)" | jq -r .response > $(INSTANCE_NAME).binding.json ;\
+	$(CSB_EXEC) client bind      --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)" --bindingid "binding-$(shell date +%s)" | jq -r .response > $(INSTANCE_NAME).binding.json ;\
 	)
 
 demo-down: ## Clean up data left over from tests and demos
 	@( \
 	set -e ;\
 	echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance";\
-	$(CSB_EXEC) client unbind --bindingid binding --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) 2>/dev/null;\
-	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) 2>/dev/null;\
+	$(CSB_EXEC) client unbind --bindingid binding --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) | jq -r .status_code;\
+	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) | jq -r .status_code;\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	)
 

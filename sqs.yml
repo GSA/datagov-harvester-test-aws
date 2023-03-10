@@ -30,7 +30,6 @@ provision:
     details: "The ARN of the SQS resource"
     type: string
     required: true
-    default: ""
   template_refs:
     variables: terraform/sqs/provision/variables.tf
     outputs: terraform/sqs/provision/outputs.tf
@@ -40,21 +39,15 @@ bind:
   plan_inputs: []
   user_inputs: []
   computed_inputs:
-  - name: name
-    default: ${request.instance_id}
-    overwrite: true
-    type: string
   - name: sqs_arn
-    details: "The ARN of the SQS resource"
     type: string
-    required: true
+    overwrite: true
     default: ${instance.details["sqs_arn"]}
   outputs:
   - field_name: sqs_arn
     details: "The ARN of the SQS resource"
     type: string
     required: true
-    default: ""
   template_refs:
     main: terraform/sqs/bind/main.tf
     versions: terraform/sqs/bind/versions.tf

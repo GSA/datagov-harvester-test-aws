@@ -1,9 +1,4 @@
 
-variable "name" {
-  type        = string
-  description = "Unique ID to separate sqs instances"
-}
-
 variable "sqs_arn" {
   type        = string
   description = "ARN of SQS Resource"
