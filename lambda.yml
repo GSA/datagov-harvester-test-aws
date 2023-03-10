@@ -27,6 +27,22 @@ provision:
     required: true
     type: string
     details: "SQS Resource that will trigger lambda call."
+  - field_name: s3_AWS_ACCESS_KEY_ID
+    required: false
+    type: string
+    details: "S3"
+  - field_name: s3_AWS_SECRET_ACCESS_KEY
+    required: false
+    type: string
+    details: "S3"
+  - field_name: s3_AWS_DEFAULT_REGION
+    required: false
+    type: string
+    details: "S3"
+  - field_name: s3_BUCKET_NAME
+    required: false
+    type: string
+    details: "S3"
   computed_inputs:
   - name: name
     type: string
@@ -41,6 +57,22 @@ provision:
     overwrite: false
     type: string
     default: ${request.details["sqs_input"]}}
+  - name: s3_AWS_ACCESS_KEY_ID
+    overwrite: false
+    type: string
+    default: ""
+  - name: s3_AWS_SECRET_ACCESS_KEY
+    overwrite: false
+    type: string
+    default: ""
+  - name: s3_AWS_DEFAULT_REGION
+    overwrite: false
+    type: string
+    default: ""
+  - name: s3_BUCKET_NAME
+    overwrite: false
+    type: string
+    default: ""
   outputs:
   template_refs:
     variables: terraform/lambda/provision/variables.tf

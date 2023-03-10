@@ -82,6 +82,16 @@ resource "aws_lambda_function" "main_lambda" {
   handler       = "main.handler"
 
   package_type = "Zip"
+
+  environment {
+    variables = {
+      S3_AWS_ACCESS_KEY_ID = var.s3_AWS_ACCESS_KEY_ID
+      S3_AWS_SECRET_ACCESS_KEY = var.s3_AWS_SECRET_ACCESS_KEY
+      S3_AWS_DEFAULT_REGION = var.s3_AWS_DEFAULT_REGION
+      S3_BUCKET_NAME = var.s3_BUCKET_NAME
+    }
+  }
+
   depends_on = [
     null_resource.python_deployment
   ]

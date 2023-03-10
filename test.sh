@@ -26,16 +26,20 @@ AWS_ACCESS_KEY_ID=`echo "${S3_CREDENTIALS}" | jq -r .credentials.access_key_id`
 AWS_SECRET_ACCESS_KEY=`echo "${S3_CREDENTIALS}" | jq -r .credentials.secret_access_key`
 BUCKET_NAME=`echo "${S3_CREDENTIALS}" | jq -r .credentials.bucket`
 AWS_DEFAULT_REGION=`echo "${S3_CREDENTIALS}" | jq -r '.credentials.region'`
+echo export AWS_ACCESS_KEY_ID=`echo "${S3_CREDENTIALS}" | jq -r .credentials.access_key_id`
+echo export AWS_SECRET_ACCESS_KEY=`echo "${S3_CREDENTIALS}" | jq -r .credentials.secret_access_key`
+echo export BUCKET_NAME=`echo "${S3_CREDENTIALS}" | jq -r .credentials.bucket`
+echo export AWS_DEFAULT_REGION=`echo "${S3_CREDENTIALS}" | jq -r '.credentials.region'`
 
 echo "Creating SQS Instance: $instance_name-sqs"
 binding="binding-`date +%s`"
 SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base' BIND_NAME=$binding  make demo-up
 
 sqs_arn="`cat "$instance_name-sqs.binding.json" | jq -r .credentials.sqs_arn`"
-echo $sqs_arn
+# echo $sqs_arn
 echo "Creating Lambda Function: $instance_name-lambda"
-provisions="'{ \"sqs_input\": \"${sqs_arn}\", \"script\": \"${script}\" }'"
-echo $provisions
+provisions="'{ \"sqs_input\": \"${sqs_arn}\", \"script\": \"${script}\", \"s3_AWS_ACCESS_KEY_ID\": \"${AWS_ACCESS_KEY_ID}\", \"s3_AWS_SECRET_ACCESS_KEY\": \"${AWS_SECRET_ACCESS_KEY}\", \"s3_AWS_DEFAULT_REGION\": \"${AWS_DEFAULT_REGION}\", \"s3_BUCKET_NAME\": \"${BUCKET_NAME}\" }'"
+# echo $provisions
 SERVICE_ID=$SERVICE_LAMBDA PLAN_ID=$PLAN_LAMBDA INSTANCE_NAME="$instance_name-lambda" SERVICE_NAME='lambda' PLAN_NAME='base' BIND_NAME=$binding  CLOUD_PROVISION_PARAMS=$provisions make demo-up
 
 
