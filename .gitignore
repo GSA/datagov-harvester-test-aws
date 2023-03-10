@@ -57,3 +57,4 @@ terraform/*/provision/.cache
 # Lambda deployment files
 deployment.zip
 main.py
+test.py.quotes

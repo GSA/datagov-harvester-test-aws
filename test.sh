@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# set -e
+set -e
 
 SERVICE_SQS='b6850430-71bd-4096-9f75-e395524e7b73'
 PLAN_SQS='4c0c7e5e-9f86-47be-aaed-29ae9adf7c49'
@@ -9,10 +9,12 @@ PLAN_LAMBDA='4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d'
 
 instance_name=demo-test3
 
+sed 's/"/\\"/g' test.py > test.py.quotes
+sed -i 's/    /\\t/g' test.py.quotes
 script=""
 while IFS= read -r line; do
   script="${script}\n${line}"
-done < test.py
+done < test.py.quotes
 
 
 
