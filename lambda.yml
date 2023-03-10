@@ -23,7 +23,7 @@ provision:
     required: true
     type: string
     details: "Python script in the form of a multiline string."
-  - field_name: sqsInput
+  - field_name: sqs_input
     required: true
     type: string
     details: "SQS Resource that will trigger lambda call."

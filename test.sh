@@ -1,9 +1,8 @@
 #!/bin/bash
 
-set -e
+# set -e
 
-# Iterate through examples
-# Check examples.json-template to figure the indexes of each configuration
+DESTROY=$1
 
 SERVICE_SQS='b6850430-71bd-4096-9f75-e395524e7b73'
 PLAN_SQS='4c0c7e5e-9f86-47be-aaed-29ae9adf7c49'
@@ -34,9 +33,13 @@ binding="binding-`date +%s`"
 SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base' BIND_NAME=$binding  make demo-up
 
 sqs_arn=`cat "$instance_name-sqs.binding.json" | jq -r .credentials.sqs_arn`
-# echo "Creating Lambda Function: $instance_name-lambda"
-# SERVICE_ID=$SERVICE_LAMBDA PLAN_ID=$PLAN_LAMBDA INSTANCE_NAME="$instance_name-lambda" SERVICE_NAME='lambda' PLAN_NAME='base' BIND_NAME=$binding  CLOUD_PROVISION_PARAMS="{\"sqsInput\": \"${sqs_arn}\", \"script\": \"${script}\"}" make demo-up
+echo "Creating Lambda Function: $instance_name-lambda"
+SERVICE_ID=$SERVICE_LAMBDA PLAN_ID=$PLAN_LAMBDA INSTANCE_NAME="$instance_name-lambda" SERVICE_NAME='lambda' PLAN_NAME='base' BIND_NAME=$binding  CLOUD_PROVISION_PARAMS="{\"sqsInput\": \"${sqs_arn}\", \"script\": \"${script}\"}" make demo-up
 
 
-echo "Destrowing SQS Instance: $instance_name-sqs"
-SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base' BIND_NAME=$binding  make demo-down
+if [[ $DESTROY -eq 0 ]]; then
+  echo "Destroying Lambda Function: $instance_name-lambda"
+  SERVICE_ID=$SERVICE_LAMBDA PLAN_ID=$PLAN_LAMBDA INSTANCE_NAME="$instance_name-lambda" SERVICE_NAME='lambda' PLAN_NAME='base' BIND_NAME=$binding  make demo-down
+  echo "Destroying SQS Instance: $instance_name-sqs"
+  SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base' BIND_NAME=$binding  make demo-down
+fi
