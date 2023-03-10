@@ -35,22 +35,12 @@ provision:
     default: ${request.instance_id}
   - name: script
     default: "print('You need to supply a script!')"
-    overwrite: true
+    overwrite: false
     type: string
   - name: sqs_input
-    overwrite: true
+    overwrite: false
     type: string
-    default: ""
-  - name: region
-    type: string
-    details: "The AWS region in which to create all AWS resources"
-    overwrite: true
-    default: ${config("aws.default_region")}
-  - name: zone
-    type: string
-    details: "The Route53 zone in which to create k8s instances"
-    overwrite: true
-    default: ${config("aws.zone")}
+    default: ${request.details["sqs_input"]}}
   outputs:
   template_refs:
     variables: terraform/lambda/provision/variables.tf

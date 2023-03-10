@@ -24,7 +24,7 @@ resource "aws_iam_role_policy_attachment" "lambda_operations" {
 }
 
 resource "aws_iam_policy" "lambda_operations" {
-  name        = "solr-${var.name}-lambda_operations"
+  name        = "${var.name}-lambda_operations"
   path        = "/"
   description = "IAM policy for logging/ecs-restarts from a lambda"
 
@@ -40,13 +40,6 @@ resource "aws_iam_policy" "lambda_operations" {
       ],
       "Resource": "arn:aws:logs:*:*:*",
       "Effect": "Allow"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ecs:*"
-      ],
-      "Resource": "*"
     },
     {
        "Effect": "Allow",

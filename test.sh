@@ -7,14 +7,13 @@ PLAN_SQS='4c0c7e5e-9f86-47be-aaed-29ae9adf7c49'
 SERVICE_LAMBDA='a1fa5f24-ed73-48e8-a99f-14906728b945'
 PLAN_LAMBDA='4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d'
 
-instance_name=demo-test
-script=<<-PYTHON
-def handler(event, context):
-    for record in event['Records']:
-        print("test")
-        payload = record["body"]
-        print(str(payload))
-PYTHON
+instance_name=demo-test3
+
+script=""
+while IFS= read -r line; do
+  script="${script}\n${line}"
+done < test.py
+
 
 
 echo "Creating S3 Bucket: $instance_name-s3"
@@ -30,10 +29,12 @@ echo "Creating SQS Instance: $instance_name-sqs"
 binding="binding-`date +%s`"
 SERVICE_ID=$SERVICE_SQS PLAN_ID=$PLAN_SQS INSTANCE_NAME="$instance_name-sqs" SERVICE_NAME='sqs' PLAN_NAME='base' BIND_NAME=$binding  make demo-up
 
-sqs_arn=`cat "$instance_name-sqs.binding.json" | jq -r .credentials.sqs_arn`
+sqs_arn="`cat "$instance_name-sqs.binding.json" | jq -r .credentials.sqs_arn`"
+echo $sqs_arn
 echo "Creating Lambda Function: $instance_name-lambda"
-# SERVICE_ID=$SERVICE_LAMBDA PLAN_ID=$PLAN_LAMBDA INSTANCE_NAME="$instance_name-lambda" SERVICE_NAME='lambda' PLAN_NAME='base' BIND_NAME=$binding  CLOUD_PROVISION_PARAMS="{\"sqs_input\": \"${sqs_arn}\", \"script\": \"${script}\"}" make demo-up
-# SERVICE_ID=$SERVICE_LAMBDA PLAN_ID=$PLAN_LAMBDA INSTANCE_NAME="$instance_name-lambda" SERVICE_NAME='lambda' PLAN_NAME='base' BIND_NAME=$binding  CLOUD_PROVISION_PARAMS="{\"sqs_input\": \"arn:aws:sqs:us-west-2:645945852371:demo-test-sqs-queue\", \"script\": \"${script}\"}" make demo-up
+provisions="'{ \"sqs_input\": \"${sqs_arn}\", \"script\": \"${script}\" }'"
+echo $provisions
+SERVICE_ID=$SERVICE_LAMBDA PLAN_ID=$PLAN_LAMBDA INSTANCE_NAME="$instance_name-lambda" SERVICE_NAME='lambda' PLAN_NAME='base' BIND_NAME=$binding  CLOUD_PROVISION_PARAMS=$provisions make demo-up
 
 
 if [[ $DESTROY -eq 1 ]]; then
