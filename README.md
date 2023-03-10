@@ -40,7 +40,10 @@ brokerpak concept, and to the Pivotal team running with the concept!
     ```bash
     ./test.sh
     ```
-1. Log into AWS Console (`ssb-development`) and go to `SQS` to send a test message.
+1. Log into AWS Console (`ssb-development`) and go to `SQS` to send a test message... **OR**
+    ```bash
+    aws sqs send-message --queue-url https://sqs.us-west-2.amazonaws.com/<account-id>/<queue-name> --message-body "raw data" --delay-seconds 2
+    aws sqs send-message --queue-url https://sqs.us-west-2.amazonaws.com/<account-id>/<queue-name> --message-body "anything else" --delay-seconds 2
 1. Export cloud.gov S3 Credentials to inspect exported data
     ```bash
     aws s3 ls s3://${BUCKET_NAME}/raw/
