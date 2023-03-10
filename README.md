@@ -30,7 +30,7 @@ brokerpak concept, and to the Pivotal team running with the concept!
     - AWS_SECRET_ACCESS_KEY
     - AWS_DEFAULT_REGION
 
-For the Demo:
+## For the Demo:
 1. Ensure `ssb-development` AWS Credentials are set up.
 1. Start broker
     ```bash
