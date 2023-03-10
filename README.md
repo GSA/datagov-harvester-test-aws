@@ -30,113 +30,29 @@ brokerpak concept, and to the Pivotal team running with the concept!
     - AWS_SECRET_ACCESS_KEY
     - AWS_DEFAULT_REGION
 
-Run the `make` command by itself for information on the various targets that are available. 
-
-```bash
-$ make
-clean      Bring down the broker service if it is up and clean out the database
-build      Build the brokerpak(s)
-up         Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser. 
-down       Bring the cloud-service-broker service down
-test       Execute the brokerpak examples against the running broker (TODO)
-k8s-demo-up    Provision a SolrCloud instance and output the bound credentials
-k8s-demo-down  Clean up data left over from tests and demos
-ecs-demo-up    Provision a Solr standalone instance (configured for ckan) and output the bound credentials
-ecs-demo-down  Clean up data left over from tests and demos
-kind-up    Set up a local Kubernetes test environment using KinD
-kind-down  Tear down the Kubernetes test environment in KinD
-all        Clean and rebuild, start test environment, run the broker, run the examples, and tear the broker and test env down
-help       This help
-```
-
-Notable targets are described below.
-
-## Iterating on the Terraform code
-
-To work with the Terraform and target cluster directly (eg not through the CSB or brokerpak), you can generate an appropriate .tfvars file by running:
-
-```bash
-make .env
-```
-
-From that point on, you can `cd terraform/provision` and iterate with `terraform init/plan/apply/etc`. The same configuration is also available in `terraform/bind`.
-
-(Note if you've been working with the broker the configuration will probably already exist.)
-
-## Building and starting the brokerpak (while the test environment is available)
-
-Run
-
-```bash
-make build up 
-```
-
-The broker will start and (after about 40 seconds) listen on `0.0.0.0:8080`. You
-test that it's responding by running:
-
-```bash
-curl -i -H "X-Broker-API-Version: 2.16" http://user:pass@127.0.0.1:8080/v2/catalog
-```
-
-In response you will see a YAML description of the services and plans available
-from the brokerpak.
-
-(Note that the `X-Broker-API-version` header is [**required** by the OSBAPI
-specification](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#headers).
-The broker will reject requests that don't include the header with `412
-Precondition Failed`, and browsers will show that status as `Not Authorized`.)
-
-You can also inspect auto-generated documentation for the brokerpak's offerings
-by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your browser.
-
-### Testing manually
-
-Run
-
-```bash
-docker-compose exec -T broker /bin/cloud-service-broker client help"
-```
-
-to get a list of available commands. You can further request help for each
-sub-command. Use this command to poke at the browser one request at a time.
-
-For example to see the catalog:
-
-```bash
-docker-compose exec -T broker /bin/cloud-service-broker client catalog"
-```
-
-...and so on.
-
-## Iterating on the brokerpak itself
-
-To rebuild the brokerpak and launch it, then provision a test instance:
-
-```bash
-make down build up demo-up
-# Poke and prod 
-make demo-down down
-```
-
-## Tearing down the brokerpak
-
-Run
-
-```bash
-make down
-```
-
-The broker will be stopped.
-
-## Cleaning out the current state
-
-Run
-
-```bash
-make clean
-```
-
-The broker image, database content, and any built brokerpak files will be removed.
+## For the Demo:
+1. Ensure `ssb-development` AWS Credentials are set up.
+1. Start broker
+    ```bash
+    make clean build up
+    ```
+1. Create demo infrastructure
+    ```bash
+    ./test.sh
+    ```
+1. Log into AWS Console (`ssb-development`) and go to `SQS` to send a test message... **OR**
+    ```bash
+    aws sqs send-message --queue-url https://sqs.us-west-2.amazonaws.com/<account-id>/<queue-name> --message-body "raw data" --delay-seconds 2
+    aws sqs send-message --queue-url https://sqs.us-west-2.amazonaws.com/<account-id>/<queue-name> --message-body "anything else" --delay-seconds 2
+1. Export cloud.gov S3 Credentials to inspect exported data
+    ```bash
+    aws s3 ls s3://${BUCKET_NAME}/raw/
+    aws s3 ls s3://${BUCKET_NAME}/clean/
+    ```
+1. Destroy demo infrastructure.
+    ```bash
+    DESTROY=1 ./test.sh
+    ```
 
 ## Contributing
 

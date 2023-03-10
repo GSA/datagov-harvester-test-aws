@@ -52,7 +52,7 @@ build: manifest.yml sqs.yml lambda.yml $(shell find terraform) ## Build the brok
 
 # Healthcheck solution from https://stackoverflow.com/a/47722899
 # (Alpine inclues wget, but not curl.)
-up: .env.secrets .env ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
+up: ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
 	docker run $(DOCKER_OPTS) \
 	-p 8080:8080 \
 	-e SECURITY_USER_NAME=$(SECURITY_USER_NAME) \
@@ -60,10 +60,8 @@ up: .env.secrets .env ## Run the broker service with the brokerpak configured. T
 	-e "DB_TYPE=sqlite3" \
 	-e "DB_PATH=/tmp/csb-db" \
 	-e "GSB_DEBUG=true" \
-	--env-file .env \
 	--env-file .env.secrets \
-	--name csb-service-$(BROKER_NAME) \
-	-d --network kind \
+	--name csb-service-$(BROKER_NAME) -d \
 	--health-cmd="wget --header=\"X-Broker-API-Version: 2.16\" --no-verbose --tries=1 --spider http://$(SECURITY_USER_NAME):$(SECURITY_USER_PASSWORD)@localhost:8080/v2/catalog || exit 1" \
 	--health-interval=2s \
 	--health-retries=15 \
@@ -75,33 +73,26 @@ up: .env.secrets .env ## Run the broker service with the brokerpak configured. T
 down: ## Bring the cloud-service-broker service down
 	-@docker stop csb-service-$(BROKER_NAME)
 
-.env.secrets:
-	@echo Copy .env.secrets-template to .env.secrets, then edit in your own values
-
 all: clean build up demo-up demo-down down ## Clean and rebuild, run the broker, provision/bind instance, unbind/deprovision instance, and tear the broker down
 
 demo-up: ## Provision an instance of a specific plan and output the bound credentials
 	@( \
 	set -e ;\
 	echo "Provisioning $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params '$(CLOUD_PROVISION_PARAMS)';\
+	$(CSB_EXEC) client provision --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params $(CLOUD_PROVISION_PARAMS) | jq -r .;\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
-	$(CSB_EXEC) client bind      --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)" --bindingid binding --params "$(CLOUD_BIND_PARAMS)" | jq -r .response > $(INSTANCE_NAME).binding.json ;\
+	$(CSB_EXEC) client bind      --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)" --bindingid "$(BIND_NAME)" | jq -r .response > $(INSTANCE_NAME).binding.json ;\
 	)
 
 demo-down: ## Clean up data left over from tests and demos
 	@( \
 	set -e ;\
 	echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance";\
-	$(CSB_EXEC) client unbind --bindingid binding --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) 2>/dev/null;\
-	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) 2>/dev/null;\
+	$(CSB_EXEC) client unbind --bindingid $(BIND_NAME) --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) | jq -r .status_code;\
+	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) | jq -r .status_code;\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	)
-
-.env: generate-env.sh
-	@echo Generating a .env file containing the k8s config needed by the broker
-	@./generate-env.sh
 
 examples.json: examples.json-template
 	@./generate-examples.sh > examples.json

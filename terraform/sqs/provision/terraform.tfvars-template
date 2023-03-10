@@ -1,0 +1,3 @@
+
+# Name of sqs instance in AWS
+name = "test"

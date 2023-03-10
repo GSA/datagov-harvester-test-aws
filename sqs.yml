@@ -3,10 +3,10 @@ name: sqs
 id: b6850430-71bd-4096-9f75-e395524e7b73
 description: Test SQS Service
 display_name: SQS Resource
-image_url: 
+image_url: https://github.com/GSA/datagov-11ty/raw/main/_img/logo.png
 documentation_url: https://aws.amazon.com/sqs/
 support_url: https://github.com/GSA/datagov-brokerpak-harvester-aws
-tags: [apache, search, index, k8s]
+tags: [aws, sqs, queue, harvester]
 
 plans:
 - name: base
@@ -14,56 +14,43 @@ plans:
   description: Provision a dynamic SQS instance
   display_name: Provision a dynamic SQS instance
   bullets:
-  - "REQUIRED prerequisite: An AWS Account into which Solr resources with be launched."
+  - "REQUIRED prerequisite: An AWS Account into which SQS Resources with be created."
   properties: {}
 provision:
   plan_inputs: []
   user_inputs:
-  - field_name: solrImageRepo
-    required: false
-    type: string
-    details: "Repo for the Solr Docker image to use, defaults to docker.io/solr"
   computed_inputs:
-  - name: instance_name
+  - name: name
     type: string
-    details: "The name of the cloud to create (used only for demo purposes)"
+    details: "The name of the SQS resource."
     overwrite: true
     default: ${request.instance_id}
-  - name: labels
-    default: ${json.marshal(request.default_labels)}
-    overwrite: true
-    type: object
-    details: "Labels with the org, space, and instance ID"
-  - name: solrImageRepo
-    default: "ghcr.io/gsa/catalog.data.gov.solr"
-    overwrite: false
-    type: string
   outputs:
-  - field_name: solr_leader_url
-    details: "The Solr Leader url for the created instance"
+  - field_name: sqs_arn
+    details: "The ARN of the SQS resource"
     type: string
     required: true
   template_refs:
-    admin: terraform/ecs/provision/admin.tf
+    variables: terraform/sqs/provision/variables.tf
+    outputs: terraform/sqs/provision/outputs.tf
+    sqs: terraform/sqs/provision/sqs.tf
+    versions: terraform/sqs/provision/versions.tf
 bind:
   plan_inputs: []
   user_inputs: []
   computed_inputs:
-  - name: instance_name
-    default: ${request.instance_id}
-    overwrite: true
+  - name: sqs_arn
     type: string
-  - name: solr_admin_pass
-    default: ${instance.details["solr_admin_pass"]}
     overwrite: true
-    type: string
+    default: ${instance.details["sqs_arn"]}
   outputs:
-  - field_name: domain
-    required: false
+  - field_name: sqs_arn
+    details: "The ARN of the SQS resource"
     type: string
-    details: The domain of the Solr Leader instance that was created
+    required: true
   template_refs:
-    main: terraform/ecs/bind/main.tf
+    main: terraform/sqs/bind/main.tf
+    versions: terraform/sqs/bind/versions.tf
 
 examples: []
 plan_updateable: false
